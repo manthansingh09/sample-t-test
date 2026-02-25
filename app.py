@@ -27,17 +27,36 @@ def two_side_givendata(n1, n2, x1_bar, x2_bar, s1, s2, comparison):
     # Degrees of freedom
     df = n1 + n2 - 2
     
-    # Critical values (alpha = 0.01 for two-tailed)
-    t_table_pos = t.ppf(1 - 0.005, df)
-    t_table_neg = t.ppf(0.005, df)
+    # Alpha level
+    alpha = 0.01
     
-    # Decision
-    if comparison == 'greater':
-        decision = "Reject H0" if t_cal > t_table_pos else "Fail to Reject H0"
-    elif comparison == 'less':
-        decision = "Reject H0" if t_cal < t_table_neg else "Fail to Reject H0"
-    else:  # two-tailed
-        decision = "Fail to Reject H0" if t_table_neg < t_cal < t_table_pos else "Reject H0"
+    # Critical values and decision based on test type
+    if comparison == 'two-tailed':
+        # Two-tailed test: H₀: μ₁ = μ₂ vs H₁: μ₁ ≠ μ₂
+        # Critical values at ±t_α/2 = ±t_0.005
+        t_crit = t.ppf(1 - alpha/2, df)
+        t_table_pos = t_crit
+        t_table_neg = -t_crit
+        # Reject if |t_cal| > t_crit, i.e., if t_cal > t_crit or t_cal < -t_crit
+        decision = "Reject H0" if abs(t_cal) > t_crit else "Fail to Reject H0"
+        
+    elif comparison == 'greater':
+        # Right-tailed test: H₀: μ₁ ≤ μ₂ vs H₁: μ₁ > μ₂
+        # Critical value at t_α = t_0.01
+        t_crit = t.ppf(1 - alpha, df)
+        t_table_pos = t_crit
+        t_table_neg = -t_crit
+        # Reject if t_cal > t_crit
+        decision = "Reject H0" if t_cal > t_crit else "Fail to Reject H0"
+        
+    else:  # comparison == 'less'
+        # Left-tailed test: H₀: μ₁ ≥ μ₂ vs H₁: μ₁ < μ₂
+        # Critical value at -t_α = -t_0.01
+        t_crit = t.ppf(1 - alpha, df)
+        t_table_pos = t_crit
+        t_table_neg = -t_crit
+        # Reject if t_cal < -t_crit
+        decision = "Reject H0" if t_cal < -t_crit else "Fail to Reject H0"
     
     return {
         "t_statistic": t_cal,
